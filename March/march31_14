@@ -1,0 +1,5 @@
+  print "perl matching operator with /$1,/$2..";
+   my $word="CuNaHg";
+   $word=~/(((Cu)(Na))(Hg))/;
+   print "1:$1 2:$2 3:$3 4:$4 5:$5 \n";
+

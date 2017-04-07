@@ -1,0 +1,9 @@
+      print "string concatenate..\n";
+      my $str1="this is Bangalore,";
+      my $str2="garden city";
+      $join="";
+      $join=$str1.'';
+      $join.=$str2;
+      print "$join\n";
+      
+      

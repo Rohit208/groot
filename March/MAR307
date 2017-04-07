@@ -1,0 +1,14 @@
+       print"creating a  hash...\n";
+        #creating hash 
+       my %phone=(
+
+              "rohan"=>"9739657905",
+              "soham"=>"9739657906",
+            );
+       print"Hash size:",scalar keys %phone;
+       print"\n";
+       #empty hash
+       print"empty hash...\n";
+        my %emptyempty=();
+       print"Hash size:",scalar keys %emptyempy;
+       

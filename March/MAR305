@@ -1,0 +1,20 @@
+ 
+   my %cap=(
+            "india"=>"new delhi",
+           "china" =>"beijing",
+           "uk" => "london",
+           "us"=> "washington d.c"
+        );
+      print "key existence..\n";
+     
+
+     if(exists($cap{'india'}))
+     {
+      print "key found\n";
+     }
+      
+      
+
+
+
+   

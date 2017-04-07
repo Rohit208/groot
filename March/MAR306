@@ -1,0 +1,11 @@
+print "hash slices...\n";   
+
+my %cap=(
+             "india"=>"new delhi",
+             "south_korea"=>"seoul",
+             "usa"=>"wasington dc",
+            "australia"=>"canberra"
+           );
+       @array=@cap{india,south_korea,australia};
+       print "@array\n";
+

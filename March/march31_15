@@ -1,0 +1,7 @@
+   print "perl matching operator..\n";
+   my $word="CuNaHg";
+   my $word=~/(?:(Cu)NaHg)/;
+   print "$1\n";
+   print "done\n";
+
+   

@@ -1,0 +1,17 @@
+     my %name=(
+          "bucky"=>"me",
+          "sabasky"=>"robin",
+          "raju"=>"paul",
+          "tapan"=>"das"
+        );
+     while( ($key,$value)=each(%name))
+     {   print $key.",".$value."\n";
+     }
+     
+     print"add two element..\n";
+     $name{rohan}=sharma;
+     $name{oshin}=dutta;
+     while(($k,$v)=each(%name))
+    {
+      print $k.",".$v."\n";
+    }     

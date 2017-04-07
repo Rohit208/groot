@@ -1,0 +1,18 @@
+     my %name=(
+            "ratan"=>"sahu",
+            "ishant"=>"bhatt",
+            "nishant"=>"aman",
+            "sachin"=>"gupta"
+          );
+         while(($k,$v)=each(%name))
+        {
+         print $k.",".$v."\n";
+         }
+     print"after delete two element...\n";
+       delete($name{ratan});
+       delete($name{sachin});
+       print"\n";
+      while(($key,$value)=each(%name))
+      {  
+        print $key.",".$value."\n";
+      }

@@ -1,0 +1,18 @@
+  
+   
+   print "sorting by values\n";
+   my %cap=(
+
+             "india"=>"new delhi",
+             "japan"=>"tokio",
+             "uk"=>"london",
+             "us"=>"washinton dc"
+           );
+         
+         
+
+    for my $v (sort{$cap{ $a} cmp $cap{$b}} keys %cap)
+         {
+           print "$v:$cap{$v}\n";
+          }
+       

@@ -1,0 +1,10 @@
+    $_="this is Bangalore\n";
+     if(/Bangalore/)
+{
+     print "matching\n";
+ }
+else
+{
+    print "not matching\n";
+}
+  

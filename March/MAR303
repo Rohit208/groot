@@ -1,0 +1,18 @@
+      use strict;
+      use warnings;
+      print "\"sorting by key..\"\n";
+      my %name=(
+                 "rohan"=>"ghosh",
+                 "tapan"=>"das",
+                  "varun"=>"reddy",
+                  "pratyoosh"=>"maharana"
+
+                );
+        
+           
+      foreach my $k (sort keys %name){
+         print"$k:$name{$k}\n";
+           }
+          
+
+    

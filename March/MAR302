@@ -1,0 +1,12 @@
+    use strict;
+    use warnings;
+    my %cap=(
+
+              "red"=>"apple",
+              "green"=>"goava",
+              "yellow"=>"mango"
+         
+             );
+       while((my $k,my $v)=each(%cap)){
+          print $k.",".$v."\n";
+  }

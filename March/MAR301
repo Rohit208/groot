@@ -1,0 +1,15 @@
+     
+
+  
+   my %capital=(
+
+               "karnataka" => "bangalore",
+               "maharashtra" => "mumbai",
+               "tamil nadu" => "chennai",
+               "west bengal" => "kolkata"
+              ) ;
+              print "$capital{'karnataka'}\n";
+              print "$capital{'maharashtra'}\n";
+              print "$capital{'tamil nadu'}\n";
+              print "$capital{'west bengal'}\n";
+         

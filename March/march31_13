@@ -1,0 +1,12 @@
+      print "matching operator with m..\n";
+       $var="this is bangalore";
+       if($var=~m[bangalore]){
+
+
+    print "matching\n";
+  } else{
+ 
+   print "not matching\n";
+  }
+  
+     

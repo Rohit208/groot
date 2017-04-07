@@ -1,0 +1,21 @@
+     use strict;
+     use warnings;
+     my $var="this is bangalore";
+     if($var!~/bangalore/)
+      {
+        print "matching\n";
+      }
+      else
+      {
+        print "not matching\n";
+      }
+     my $var="this is jp_nagar";
+     if($var!~/jap_nagar/)
+      {
+        print "matching\n";
+       }
+      else
+      {
+       print "not matching\n";
+      }
+          
