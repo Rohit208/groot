@@ -6,34 +6,40 @@ use diagnostics;
 use Switch;
 use Text::CSV_XS;
 use Text::Table;
+use Email::Valid;
 
+my %hash;
 my  @DB;
-my $new;
-my $string;
-my $file = $ARGV[0] or die "file not loaded\n";
 
-sub CSV()
+my $file = $ARGV[0] or die "file not loaded\n";
+my $csv = Text::CSV_XS-> new({ binary => 1, eol => $/});
+
+sub CSV
 { 
-  my $csv = Text::CSV_XS-> new({ binary => 1, eol => $/});
   open my $FILE,"<",$file or die "couldn't open $file : $!";
   while(my $value = $csv->getline($FILE)) {
   push(@DB,$value);
    }
-close($FILE) or die "couldn't close";
+close($FILE) or die "couldn't close CSVreader";
 }
 
-sub Table()
+sub Table
 {
-my $tb = Text::Table->new("Name","DateOfBirth","Department","DateOfJoining","Salary","Email");
+my $tb = Text::Table->new(\'| ', "Name",\'| ', "DateOfBirth",\'| ', "Department",\'| ', "DateOfJoining",\'| ', "Salary",\'| ' , "Email",\' |');
 $tb->load(@DB);
-print $tb;
+my $rule = $tb->rule(qw/- +/);
+my @arr =$tb->body;
+print $rule,$tb->title,$rule;
+for(@arr)
+ {
+  print $_.$rule;
+ }
 }
 
-sub NewEmployee()
+sub NewEmployee
 {
 print "\n::::Details of the Empolyee ::::\n";
-print "Enter the Email_ID :: ";
-my $Email = <STDIN>;
+my $Email = $_[0];
 print "Enter the Name of Employee :: ";
 chomp(my $Name=<STDIN>);
 print "Enter the DOB of Employee :: ";
@@ -47,16 +53,19 @@ chomp(my $Salary=<STDIN>);
 my @newrecord = ($Name,$DOB,$Dept,$DOJ,"$Salary",$Email);
 print "Do you want to want to Edit values or Save values::::\n 1--Save\t  2--Edit";
 chomp(my $val = <STDIN>);
+  my $numregex = $val =~ /^[0-9]+$/;
+  if (not $numregex){    print "Give a valid input"; return 0; }
 if($val==1){ 
-  $string = join(",",@newrecord);
-  Append();
+ my $string = join(",",@newrecord);
+  Append($string);
  } 
 if($val==2) { 
-  $new = \@newrecord;
-  }
+  my  $new = \@newrecord;
+  return $new;
+ }
 }
 
-sub Writer()
+sub Writer
 {
  open my $DATA,">",$file or die "couldn't open";
  foreach my $v (@DB)
@@ -64,7 +73,7 @@ sub Writer()
    if(defined $v){
       my @record = @{$v};
       $record[4]= '"'.$record[4].'"';
-      $string = join(',',@record);
+      my $string = join(',',@record);
       @record = ();
       print $DATA "$string\n";
     }
@@ -72,44 +81,52 @@ sub Writer()
  close $DATA or die "Writer not closed";
 }
 
-sub Append()
+sub Append
 {
+ my $string = $_[0];
  open my $DATA,">>",$file or die "couldn't open";
    print $DATA "$string\n";
  close $DATA or die  "Appender not closed";
 }
 
-sub validate() {
-my $count = 0;
+sub validate {
 print "Enter Email_ID for validation ::\n";
 chomp(my $Email=<STDIN>);
-foreach my $v (0..$#DB) {
-my $gmail = ${$DB[$v]}[5];
- if($Email eq $gmail ) {
-   $count++;
+my $address = Email::Valid->address($Email);
+my $regex = $Email =~ /^[0-z0-9]([a-z0-9.]+[a-z0-9])?\@[a-z0-9.-]+$/;
+if(not $address and not $regex) {
+  print "INvalid Email_ID";  return 0;
+ }
+for my $v(0..$#DB) {
+   $hash{${$DB[$v]}[5]} = $v;
+ }
+if(exists $hash{$Email}) {
    print "Already available try a NEW Record\n";
-   print "Do you want to do with Record ::Delete-1 \t Edit-2\t ";
+   print "what Do you want to do with Record ::Delete-1 \t Edit-2\t option->\t ";
    chomp(my $val =<STDIN>);
+  my $numregex = $val =~ /^[0-9]+$/;
+  if (not $numregex){    print "Give a valid input"; return 0; }
    if($val==1) {
-      $DB[$v] = undef;
+      $DB[$hash{$Email}] = undef;
       Writer();
       print "DONE!";
-      last;
+      return 0;
     }
-   if($val ==2) { 
-        NewEmployee();
-        $DB[$v] = $new;
-        Writer();
-        print "DONE!";
-        last;
+  
+   if($val==2) { 
+      my  $new = NewEmployee($Email);
+            if($new==0) {  return 0;  }
+      $DB[$hash{$Email}] = $new;
+       Writer();
+       print "DONE!";
+       return 0;
     }
-  }
- }
-if($count == 0) { NewEmployee(); print "NEW RECORD!!"; }
+} 
+else {   print "New Record!";   NewEmployee($Email);   }
 }
 
 while(1)  {
-print "\n  1::List of Employees\n  2::Add employee\n  3::Edit employee\n  4::Delete Employee\n\n Any other key to STOP" ;
+print "\n  1::List of Employees\n  2::Add employee\n  3::Edit employee\n  4::Delete Employee\n\n Any other key to STOP\n Option-> \t" ;
 chomp(my $val=<STDIN>);
 switch($val)
 {
