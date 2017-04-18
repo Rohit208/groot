@@ -11,18 +11,20 @@ my %hash;
 my @db;
 my $file = $ARGV[0] or die "file not loaded\n";
 
-sub csv_to_table {
+sub csv_to_db {
     open my $FILE, "<", $file or die "couldn't open $file : $!";
     my $csv = Text::CSV_XS->new( { binary => 1, eol => $/ } );
     while ( my $value = $csv->getline($FILE) ) {
         push( @db, $value );
     }
     close($FILE) or die "couldn't close CSVreader";
+}
 
+sub db_to_Table {
     my $tb = Text::Table->new(
-        \'| ', "Name",       \'| ', "DateOfBirth",
-        \'| ', "Department", \'| ', "DateOfJoining",
-        \'| ', "Salary",     \'| ', "Email",
+        \'|    ', "Name",       \'|    ', "DateOfBirth",
+        \'|    ', "Department", \'|    ', "DateOfJoining",
+        \'|    ', "Salary",     \'|    ', "Email",
         \'     |'
     );
     $tb->load(@db);
@@ -62,7 +64,7 @@ sub new_employee {
     if ( $val == 1 ) {
         my $new = \@newrecord;
         $db[ $#db + 1 ] = $new;
-        $hash{$Email} = $#db + 1;
+        $hash{$Email} = $#db;
     }
     if ( $val == 2 ) {
         my $new = \@newrecord;
@@ -90,7 +92,7 @@ sub date_validation {
 }
 
 sub writer {
-    open my $DATA, ">", $file or die "couldn't open";
+    open my $DATA, ">", $file or die "couldn't open\n";
     foreach my $v (@db) {
         if ( defined $v ) {
             my @record = @{$v};
@@ -100,7 +102,7 @@ sub writer {
             print $DATA "$string\n";
         }
     }
-    close $DATA or die "Writer not closed";
+    close $DATA or die "Writer not closed\n";
 }
 
 sub validate_data {
@@ -110,7 +112,7 @@ sub validate_data {
     my $regex =
       $Email =~ /^[a-z0-9A-Z]([a-z0-9A-Z.]+[a-z0-9A-Z])?\@[a-zA-Z0-9.-]+$/;
     if ( not $regex ) {
-        print "Invalid Email_ID";
+        print "Invalid Email_ID\n";
         return 0;
     }
     if ( exists $hash{$Email} ) {
@@ -118,45 +120,52 @@ sub validate_data {
         if ( $val == 3 ) {
             $db[ $hash{$Email} ] = undef;
             delete $hash{$Email};
-            print "DONE!";
+            print "DONE!\n";
             return 0;
         }
         if ( $val == 2 ) {
             my $new = new_employee( $Email, $val );
             if ( $new == 0 ) { return 0; }
             $db[ $hash{$Email} ] = $new;
-            print "DONE!";
+            print "DONE!\n";
             return 0;
         }
     }
-    else { print "New Record!"; new_employee( $Email, $val ); }
+    else {
+        if ( $val == 3 or $val == 2 ) {
+            print "Email not Available\n";
+            return 0;
+        }
+        print "New Record!";
+        new_employee( $Email, $val );
+    }
 }
 
-csv_to_table();
+csv_to_db();
+db_to_Table();
 for my $v ( 0 .. $#db ) {
     $hash{ ${ $db[$v] }[5] } = $v;
 }
 while (1) {
     print
-"\n  1::Add employee\n  2::Edit employee\n  3::Delete Employee\n\n Any other key to STOP\n Option-> \t";
+"\n  1::Add employee\n  2::Edit employee\n  3::Delete Employee\n  4::List Of Employee\n\n Any other key to STOP\n Option-> \t";
     chomp( my $val = <STDIN> );
     switch ($val) {
         case 1 {
-            print "$val\n";
             validate_data($val);
         }
         case 2 {
-            print "$val\n";
             validate_data($val);
         }
         case 3 {
-            print "$val\n";
             validate_data($val);
+        }
+        case 4 {
+            db_to_Table();
         }
         else { $val = 0; }
     }
     if ( $val == 0 ) { last; }
 }
 writer();
-@db = ();
-csv_to_table();
+db_to_Table();
