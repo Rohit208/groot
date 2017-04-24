@@ -6,21 +6,22 @@ use diagnostics;
 use Switch;
 use Text::CSV_XS;
 use Text::Table;
+use DBI;
 
 my %hash;
 my @db;
 my $file = $ARGV[0] or die "file not loaded\n";
 
-sub csv_to_db {
+sub read_file {
     open my $FILE, "<", $file or die "couldn't open $file : $!";
     my $csv = Text::CSV_XS->new( { binary => 1, eol => $/ } );
     while ( my $value = $csv->getline($FILE) ) {
         push( @db, $value );
     }
-    close($FILE) or die "couldn't close CSVreader";
+    close($FILE) or die "couldn't close reader";
 }
 
-sub db_to_Table {
+sub display_table {
     my $tb = Text::Table->new(
         \'|    ', "Name",       \'|    ', "DateOfBirth",
         \'|    ', "Department", \'|    ', "DateOfJoining",
@@ -36,6 +37,31 @@ sub db_to_Table {
     }
 }
 
+sub Insert_Database {
+    my $driver   = "Pg";
+    my $database = "rohit";
+    my $dsn    = "DBI:$driver:dbname = $database;host = 127.0.0.1;port = 5432";
+    my $userid = "rohit";
+    my $pass   = "12345";
+    my $dbh    = DBI->connect( $dsn, $userid, $pass, { RaiseError => 1 } )
+      or die $DBI::errstr;
+
+    foreach (@db) {
+        if ( defined $_ ) {
+            my @val = @{$_};
+            for ( my $i = 0 ; $i <= $#val ; $i++ ) {
+                if ( $i == 4 ) { next; }
+                $val[$i] = '\'' . $val[$i] . '\'';
+            }
+            my $string = join( ",", @val );
+            my $stmt   = "insert into Employee_Enquiry values ($string)";
+            my $rv     = $dbh->do($stmt) or die $DBI::errstr;
+        }
+    }
+    print "\nSuccessfully updated database\n";
+    $dbh->disconnect();
+}
+
 sub new_employee {
     print "\n::::Details of the Empolyee ::::\n";
     my $Email = $_[0];
@@ -45,7 +71,7 @@ sub new_employee {
     chomp( my $name = <STDIN> );
     return 0 if ( &string_validation($name) == -1 );
 
-    print "Enter the DOB of Employee :: 'Ex-> 01Jan1994'\t ";
+    print "Enter the DOB of Employee :: 'Ex-> 1994-01-01'\t ";
     chomp( my $dOb = <STDIN> );
     return 0 if ( &date_validation($dOb) == -1 );
 
@@ -53,7 +79,7 @@ sub new_employee {
     chomp( my $dept = <STDIN> );
     return 0 if ( &string_validation($dept) == -1 );
 
-    print "Enter the DOJ of Employee :: 'Ex-> 01Jan1994' \t ";
+    print "Enter the DOJ of Employee :: 'Ex-> 1994-01-01' \t ";
     chomp( my $doj = <STDIN> );
     return 0 if ( &date_validation($doj) == -1 );
 
@@ -83,20 +109,19 @@ sub string_validation {
 
 sub date_validation {
     my $data = $_[0];
-    my $date = $data =~
-/^(0[1-9]|[12][0-9]|3[01])(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(19|20)\d\d$/;
+    my $date =
+      $data =~ /^(19|20)\d\d-(0[1-9]|1[0-2])-(0[0-9]|[12][0-9]|3[01])$/;
     if ( not $date ) {
-        print "Invalid Date dd/[jan-dec]/yyyy\n ";
+        print "Invalid Date yyyy-mm-dd\n ";
         return -1;
     }
 }
 
-sub writer {
+sub write_file {
     open my $DATA, ">", $file or die "couldn't open\n";
     foreach my $v (@db) {
         if ( defined $v ) {
             my @record = @{$v};
-            $record[4] = '"' . $record[4] . '"';
             my $string = join( ',', @record );
             @record = ();
             print $DATA "$string\n";
@@ -141,8 +166,8 @@ sub validate_data {
     }
 }
 
-csv_to_db();
-db_to_Table();
+read_file();
+display_table();
 for my $v ( 0 .. $#db ) {
     $hash{ ${ $db[$v] }[5] } = $v;
 }
@@ -161,11 +186,12 @@ while (1) {
             validate_data($val);
         }
         case 4 {
-            db_to_Table();
+            display_table();
         }
         else { $val = 0; }
     }
     if ( $val == 0 ) { last; }
 }
-writer();
-db_to_Table();
+write_file();
+display_table();
+Insert_Database();
