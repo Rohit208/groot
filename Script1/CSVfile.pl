@@ -28,7 +28,7 @@ sub display_table {
     while ( my @row = $sth->fetchrow_array() ) {
         push( @db, \@row );
     }
-    $sth->flush();
+	$sth->finish();
     $tb->load(@db);
     my $rule = $tb->rule(qw/- +/);
     my @arr  = $tb->body;
@@ -53,7 +53,7 @@ sub read_file {
             }
         }
     }
-    $sth->flush();
+    $sth->finish();
     close($FILE) or die "couldn't close reader";
 }
 
@@ -162,7 +162,7 @@ sub email_validation {
         print "\n insert \n";
         insert_details( new_details($email) );
     }
-    $sth->flush();
+    $sth->finish();
 }
 
 display_table();
