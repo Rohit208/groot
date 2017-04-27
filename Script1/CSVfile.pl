@@ -14,75 +14,80 @@ my ( $dsn, $userid, $pass ) =
   ( "DBI:Pg:dbname = rohit ;host = 127.0.0.1;port = 5432", "rohit", "12345" );
 my $dbh = DBI->connect( $dsn, $userid, $pass, { RaiseError => 1 } )
   or die $DBI::errstr;
+my %build;
 
 sub display_table {
-    my @db;
     my $tb = Text::Table->new(
         \'|    ', "Name",       \'|    ', "DateOfBirth",
         \'|    ', "Department", \'|    ', "DateOfJoining",
         \'|    ', "Salary",     \'|    ', "Email",
         \'     |'
     );
-    $sth = $dbh->prepare("select * from Employee_Enquiry;");
-    $sth->execute();
-    while ( my @row = $sth->fetchrow_array() ) {
-        push( @db, \@row );
-    }
-	$sth->finish();
-    $tb->load(@db);
+    $tb->load( &query_database() );
     my $rule = $tb->rule(qw/- +/);
     my @arr  = $tb->body;
     print $rule, $tb->title, $rule;
     for (@arr) {
-        print $_. $rule;
+      print $_. $rule;
     }
+}
+
+sub query_database {
+    my  @db;
+    $sth = $dbh->prepare("select * from Employee_Enquiry;");
+    $sth->execute() or die $DBI::errstr;
+    while ( my @row = $sth->fetchrow_array() ) {
+        $build{ $row[5] } = \@row;
+        push( @db, \@row );
+    }
+    return @db;
 }
 
 sub read_file {
     open my $FILE, "<", $file or die "couldn't open $file : $!";
     my $csv = Text::CSV_XS->new( { binary => 1, eol => $/ } );
-    $sth = $dbh->prepare("select email from Employee_Enquiry;");
-    $sth->execute();
-    while ( my $row = $sth->fetchrow_array() ) {
-        for ( my $value = $csv->getline($FILE) ) {
-            if ( !( ${$value}[5] =~ /$row/ ) ) {
-                $sth = $dbh->prepare(
-                    "select * from Employee_Enquiry where email=?;");
-                $sth->execute($row);
-                write_file( join( ",", $sth->fetchrow_array() ) );
-            }
-        }
-    }
-    $sth->finish();
+    while ( my $value = $csv->getline($FILE) ) {
+        if ( !( defined $build{ ${$value}[5] } ) ) {
+			$build{${$value}[5]} = $value;
+            &insert_details($value);
+		}
+	}
     close($FILE) or die "couldn't close reader";
 }
 
 sub write_file {
-    open my $DATA, ">>", $file or die "couldn't open\n";
-    print $DATA "$_[0]\n";
+    open my $DATA, ">", $file or die "couldn't open\n";
+    foreach (keys %build){
+    	print $DATA join(',',@{$build{$_}}),"\n";
+  }
     close $DATA or die "Writer not closed\n";
 }
 
 sub insert_details {
-    my $sth =
-      $dbh->prepare("insert into Employee_Enquiry values (?,?,?,?,?,?)");
-    $sth->execute(@_) or die $DBI::errstr;
+    my @data = @_;
+    $sth = $dbh->prepare("insert into Employee_Enquiry values (?,?,?,?,?,?)");
+    $build{$data[5]} = \@data;
+	$sth->execute(@data) or die $DBI::errstr;
     $sth->finish();
     print "\nSuccessfully Added\n";
 }
 
 sub update_details {
-    my $sth = $dbh->prepare(
+	my @data=@_;
+    $sth = $dbh->prepare(
 "update Employee_Enquiry SET name = ?,date_of_birth=?,department=?,date_of_joining=?,salary=? where email=?"
     );
-    $sth->execute(@_);
+    $build{$data[5]} = \@data;
+	$sth->execute(@data);
     $sth->finish();
     print "\nSuccessfully Updated\n";
 }
 
 sub delete_details {
-    my $sth = $dbh->prepare("delete from Employee_Enquiry where email=?");
-    $sth->execute( $_[0] );
+	my $data = $_[0];
+    $sth = $dbh->prepare("delete from Employee_Enquiry where email=?");
+     delete $build{$data} ;
+    $sth->execute( $data );
     $sth->finish();
     print "\nSuccessfully Deleted\n";
 }
@@ -147,7 +152,7 @@ sub email_validation {
     print "Enter Email_ID ::\n";
     chomp( my $email = <STDIN> );
     my $regex =
-      $email =~ /^[a-z0-9A-Z]([a-z0-9A-Z.]+[a-z0-9A-Z])?\@[a-zA-Z0-9.-]+$/;
+      $email =~ /^[a-z0-9A-Z]([a-z0-9A-Z.]+[a-z0-9A-Z]).@[a-zA-Z0-9.-]+$/;
     if ( not $regex ) {
         print "Invalid Email_ID\n";
         return -1;
@@ -166,6 +171,7 @@ sub email_validation {
 }
 
 display_table();
+read_file();
 while (1) {
     print
 "\n  1::Add employee\n  2::Edit employee\n  3::Delete Employee\n  4::List Of Employee\n\n Any other key to STOP\n Option-> \t";
@@ -187,5 +193,6 @@ while (1) {
     }
     if ( $val == 0 ) { last; }
 }
-read_file();
+
+write_file();
 $dbh->disconnect();
