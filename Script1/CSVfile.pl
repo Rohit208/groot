@@ -4,9 +4,9 @@ use strict;
 use warnings;
 use diagnostics;
 use Switch;
-use Text::CSV_XS;
-use Text::Table;
-use DBI;
+use Text::CSV_XS ();
+use Text::Table ();
+use DBI ();
 
 my $sth;
 my $file = $ARGV[0] or die "file not loaded\n";
@@ -17,42 +17,41 @@ my $dbh = DBI->connect( $dsn, $userid, $pass, { RaiseError => 1 } )
 my %build;
 
 sub display_table {
+	my @db;
     my $tb = Text::Table->new(
         \'|    ', "Name",       \'|    ', "DateOfBirth",
         \'|    ', "Department", \'|    ', "DateOfJoining",
         \'|    ', "Salary",     \'|    ', "Email",
         \'     |'
     );
-    $tb->load( &query_database() );
+	foreach my $v (values %build){
+	  push (@db ,$v);
+	}
+    $tb->load(@db);
     my $rule = $tb->rule(qw/- +/);
     my @arr  = $tb->body;
     print $rule, $tb->title, $rule;
-    for (@arr) {
-      print $_. $rule;
-    }
+   print $_. $rule for @arr;
 }
 
 sub query_database {
-    my  @db;
     $sth = $dbh->prepare("select * from Employee_Enquiry;");
     $sth->execute() or die $DBI::errstr;
     while ( my @row = $sth->fetchrow_array() ) {
-        $build{ $row[5] } = \@row;
-        push( @db, \@row );
-    }
-    return @db;
+        $build{$row[5]} = \@row;
+   }
 }
 
 sub read_file {
     open my $FILE, "<", $file or die "couldn't open $file : $!";
     my $csv = Text::CSV_XS->new( { binary => 1, eol => $/ } );
     while ( my $value = $csv->getline($FILE) ) {
-        if ( !( defined $build{ ${$value}[5] } ) ) {
-			$build{${$value}[5]} = $value;
-            &insert_details($value);
+        unless( defined $build{$value->[5]}  ) {
+            &insert_details($value);  ####################################
+			$build{$value->[5]} = $value;
 		}
 	}
-    close($FILE) or die "couldn't close reader";
+ close $FILE or die "couldn't close reader";
 }
 
 sub write_file {
@@ -93,30 +92,33 @@ sub delete_details {
 }
 
 sub new_details {
-    print "\n::::Details of the Empolyee ::::\n";
-    my $email = $_[0];
+	my ($email,$dob,$doj,$dept,$salary,$name);
+LINE:while(1){
+	print "\n::::Details of the Empolyee ::::\n";
+    $email = $_[0];
 
     print "Enter the Name of Employee :: ";
-    chomp( my $name = <STDIN> );
-    return 0 if ( &string_validation($name) == -1 );
+    chomp(  $name = <STDIN> );
+    redo LINE if ( &string_validation($name) == 0 );
 
     print "Enter the DOB of Employee :: 'Ex-> 1994-01-01'\t ";
-    chomp( my $dOb = <STDIN> );
-    return 0 if ( &date_validation($dOb) == -1 );
+    chomp(  $dob = <STDIN> );
+    redo LINE if ( &date_validation($dob) == 0 );
 
     print "Enter the Department of Employee ::\t ";
-    chomp( my $dept = <STDIN> );
-    return 0 if ( &string_validation($dept) == -1 );
+    chomp(  $dept = <STDIN> );
+    redo LINE if ( &string_validation($dept) == 0 );
 
     print "Enter the DOJ of Employee :: 'Ex-> 1994-01-01' \t ";
-    chomp( my $doj = <STDIN> );
-    return 0 if ( &date_validation($doj) == -1 );
+    chomp(  $doj = <STDIN> );
+    redo LINE if ( &date_validation($doj) == 0 );
 
     print "Enter the Salary of Employee ::\t ";
-    chomp( my $salary = <STDIN> );
-    return 0 if ( &number_validation($salary) == -1 );
-
-    my @newrecord = ( $name, $dOb, $dept, $doj, $salary, $email );
+    chomp(  $salary = <STDIN> );
+    redo LINE if ( &number_validation($salary) == 0 );
+    last;
+ }
+    my @newrecord = ( $name, $dob, $dept, $doj, $salary, $email );
     return @newrecord;
 }
 
@@ -125,7 +127,7 @@ sub number_validation {
     my $number = $data =~ /^[0-9]+$/;
     if ( not $number ) {
         print "Invalid Salary :: no comma's allowed";
-        return -1;
+        return 0;
     }
 }
 
@@ -134,7 +136,7 @@ sub string_validation {
     my $string = $data =~ /^[a-zA-Z _]+$/;
     if ( not $string ) {
         print "Invalid Detail \n";
-        return -1;
+        return 0;
     }
 }
 
@@ -144,34 +146,36 @@ sub date_validation {
       $data =~ /^(19|20)\d\d-(0[1-9]|1[0-2])-(0[0-9]|[12][0-9]|3[01])$/;
     if ( not $date ) {
         print "Invalid Date yyyy-mm-dd\n ";
-        return -1;
+        return 0;
     }
 }
 
 sub email_validation {
+	my $val = shift;
     print "Enter Email_ID ::\n";
     chomp( my $email = <STDIN> );
     my $regex =
       $email =~ /^[a-z0-9A-Z]([a-z0-9A-Z.]+[a-z0-9A-Z]).@[a-zA-Z0-9.-]+$/;
     if ( not $regex ) {
         print "Invalid Email_ID\n";
-        return -1;
+        return 0;
     }
     $sth = $dbh->prepare("select Email from Employee_Enquiry where Email=?");
     $sth->execute($email);
     if ( $sth->rows == 1 ) {
-        if ( $_[0] == 3 ) { delete_details($email); }
-        if ( $_[0] == 2 ) { update_details( new_details($email) ); }
+         delete_details($email) if $val==3;
+       update_details( new_details($email)) if $val==2;
+	   print "CHOOSE a better option--Adding Email that Already Exists--" if $val==1;
     }
     else {
-        print "\n insert \n";
         insert_details( new_details($email) );
     }
     $sth->finish();
 }
 
-display_table();
+query_database();
 read_file();
+display_table();
 while (1) {
     print
 "\n  1::Add employee\n  2::Edit employee\n  3::Delete Employee\n  4::List Of Employee\n\n Any other key to STOP\n Option-> \t";
