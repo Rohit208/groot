@@ -1,0 +1,34 @@
+<!DOCTYPE htmlPUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en">
+<head>
+ <title>::: Fill Form :::</title>
+ <style>
+  body {
+    background-color:#6D929B;
+  }
+ </style>
+</head>
+<body>
+<center>
+<form name = "Create" method="POST" action ="manage_data">
+Enter Name here ::: <input type="text" name = "name" /><br><br>
+
+Enter date of birth here :::<input type="text" name = "date_of_birth" / ><br><br>
+
+Enter Department here ::: <input type="text" name = "department" /><br><br>
+
+Enter date of joining here ::: <input type="text" name = "date_of_joining"/><br><br>
+
+Enter salary of Employee ::: <input type="text" name = "salary"/><br><br>
+
+Emter Email id here ::: <input type="text" name = "email"/><br><br>
+<br>
+
+  <input type="submit" name = "save" value ="Create New"/><br><br><br>
+  <input type="submit" name = "edit" value ="Edit Old"/>
+</form>
+</center>
+
+</body>
+</html>

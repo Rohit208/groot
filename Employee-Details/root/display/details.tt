@@ -1,0 +1,28 @@
+<style>
+	body{
+	   background-color:#6D929B;
+	}
+</style>
+<br><br>
+<h2>::: Employee Details :::<h2>
+<table border=10 width="100%">
+<tr>
+<th> Name </th>
+<th> Date of Birth</th>
+<th> Department </th>
+<th> Date of joining </th>
+<th> Salary </th>
+<th> Email </th>
+</tr>
+
+[% FOREACH employee IN result %]
+<tr>
+<td> [% employee.name %]</td>
+<td> [% employee.date_of_birth %]</td>
+<td> [% employee.department %]</td>
+<td> [% employee.date_of_joining %]</td>
+<td> [% employee.salary %]</td>
+<td> [% employee.email %]</td>:
+</tr>
+
+[% END %]

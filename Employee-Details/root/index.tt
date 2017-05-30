@@ -1,0 +1,97 @@
+<!DOCTYPE htmlPUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>:: Welcome To NextGen ::</title>
+
+    <meta name="description" content="Source code generated using layoutit.com">
+    <meta name="author" content="LayoutIt!">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+ <style>
+  body {
+    background-color:#6D929B;
+  }
+ </style>
+  </head>
+  <body>
+ <br><br>
+    <div class="container-fluid">
+	<table name="emp_table">
+		<tr>
+			<th> Name </th>
+			
+<br>
+<b> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+	&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+
+<form name ="Insert" method ="POST" action="manage">
+Enter Email ::: </b><input type="text" name="email" value="" title="enter the email" />
+<br><br><br><br><br><br><br>
+	<div class="row">
+		<div class="col-md-3">
+		<input type="submit" name="insert" class="btn btn-lg" value="Insert" />
+		</div>
+
+		<div class="col-md-3">
+			<input type="submit" name="edit" class="btn btn-lg" value="Edit" />
+		</div>
+
+		<div class="col-md-3">
+	  <input type="submit" name="delete" class = "btn btn-lg" value="Delete" />
+        </div>
+		
+           <div class="col-md-3">
+	  <input type="submit" name="display" class="btn btn-lg" value="Display" />
+                 </div>
+	</div>
+</form>
+<b><p name="error"> [% error %]</p></b>
+<br><br>
+
+<form name="Parser" method="POST" action="parser_N_importer" >
+<b>Upload any csv file :::<input name="file" type="file" accept=".csv" /> </b>
+<br>
+<b>Enter the seperate charater (if any) ::: <input type="text" name ="seperate_char"></b>
+<br>
+<input type="submit" value ="Parse ->Import" name="parser_importer">
+<br>
+</form>
+
+	<div class="row">
+		<div class="col-md-6">
+			<h2>
+				Parser
+			</h2>
+			<p>
+				Import Content of the file.
+			</p>
+			<p>
+				<a class="btn" href="#">View details »</a>
+			</p>
+		</div>
+		<div class="col-md-6">
+			<h2>
+				Importer
+			</h2>
+			<p>
+				Import Content to Database
+			</p>
+			<p>
+				<a class="btn" href="#">View details »</a>
+			</p>
+		</div>
+	</div>
+</div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/scriptas.js"></script>
+  </body>
+</html>
