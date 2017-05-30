@@ -91,7 +91,7 @@ sub parser_N_importer : Local {
     $c->stash->{'template'} = 'index.tt';
 }
 
-sub insert : Local {
+sub insert : Private {
     my ( $self, $c ) = @_;
     my $detail_rs = $self->dbi_con->resultset('EmployeeDetail');
 
@@ -109,7 +109,8 @@ sub insert : Local {
     );
 
     $c->log->debug("********** Inserted ***********");
-    $c->stash->{'template'} = 'index.tt';
+    $c->stash->{'error'} ='Success';
+	$c->stash->{'template'} = 'index.tt';
 }
 
 sub manage : Local {
@@ -134,17 +135,13 @@ sub manage_data :Local {
   }
 }
 
-sub edit : Local {
+sub edit : Private {
     my ( $self, $c ) = @_;
     my $email         = $c->req->body_params->{email};
     my $detail_rs     = $self->dbi_con->resultset('EmployeeDetail');
     my $detail_rs_obj = $detail_rs->search( { email => $email } );
  
-	use Data::Dumper;
-    print Dumper $detail_rs_obj;
-
     if ( $detail_rs_obj == 0 && $detail_rs_obj == "") {
-        $c->log->debug("********* Absent *************");
 		$c->stash->{'error'} = '********* Data Un-available *********';
         $c->stash->{'template'} = 'index.tt';
         return;
@@ -159,10 +156,11 @@ sub edit : Local {
         }
     );
     $c->log->debug("******** Updated ********");
+	$c->stash->{'error'} ='Success';
     $c->stash->{'template'} = 'index.tt';
 }
 
-sub delete : Local {
+sub delete : Private {
     my ( $self, $c, $email ) = @_;
     my $detail_rs = $self->dbi_con->resultset('EmployeeDetail');
 
@@ -177,12 +175,13 @@ sub delete : Local {
     }
     $detail_rs_obj->delete;
     $c->log->debug("******* Deleted *******");
+	$c->stash->{'error'} ='Success';
     $c->stash->{'template'} = 'index.tt';
 }
 
-sub display : Local {
+sub display : Private {
     my ( $self, $c ) = @_;
-    my $detail_rs     = $self->dbi_con->resultset('EmployeeDetail')->search;
+    my $detail_rs    = $self->dbi_con->resultset('EmployeeDetail')->search;
     my $emp_data;
     while ( my $employee = $detail_rs->next ) {
         push(
