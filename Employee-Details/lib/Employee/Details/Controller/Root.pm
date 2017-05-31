@@ -20,13 +20,33 @@ Employee::Details::Controller::Root - Root Controller for Employee::Details
 
 =head1 DESCRIPTION
 
-[enter your description here]
+CURD operations on employee contents and render it on the database.
 
 =head1 METHODS
 
-=head2 index
+insert :: it is private method for creating a new record.
 
-The root page (/)
+delete :: it is a private method for deleting a value in the database requires a email address as the primary key.  
+
+edit :: it is private method for updateing the values of the existing database.
+
+manage :: method for scrolling to the private methods.
+
+manage_data :: method for passing values for the crud operations.
+
+=head2 index
+Path                    <<->>      Private
+/index                    |
+/...                      |          /default
+/manage/...               |          /manage  
+/manage_data/...          |          /manage_data    
+/parser_N_importer/...    |          /parser_N_importer 
+
+=cut
+
+=head2  Private variables
+
+PARAMS :: csv_handler, separate_char, dbi_con
 
 =cut
 
@@ -51,6 +71,14 @@ has 'dbi_con' => (
     init_arg => 1,
 );
 
+=head2 Build_in DBI connection
+
+SUBROUTINE :: _build_dbi_con 
+
+RETURNS :: DBI Connection Handle
+
+=cut
+
 sub _build_dbi_con {
     my $self     = shift;
     my $dsn      = "DBI:Pg:dbname = employee";
@@ -58,11 +86,27 @@ sub _build_dbi_con {
     $self->{dbi_con} = $dbHandle;
 }
 
+=head2 Build_in File Connection
+
+SUBROUTINE :: _build_csv_handler
+
+RETURN ::  File Handle
+          
+=cut
+
 sub _build_csv_handler {
     my $self        = shift;
     my $csv_handler = Text::xSV->new();
     return $csv_handler;
 }
+
+=head2
+
+SUBROUTINE :: _build_separate_char 
+
+RETURNS :: Gets the separate char for seperate entities
+
+=cut
 
 sub _build_separate_char {
     my ( $self, $c ) = @_;
@@ -72,10 +116,19 @@ sub _build_separate_char {
     return $separate_char;
 }
 
+
 sub index : Path : Args(0) {
     my ( $self, $c ) = @_;
     $c->stash->{template} = 'index.tt';
 }
+
+=head2 parser_N_importer
+
+PARAMS :: file
+
+return :: CURD operations on the following file.
+
+=cut
 
 sub parser_N_importer : Local {
     my ( $self, $c ) = @_;
@@ -91,6 +144,14 @@ sub parser_N_importer : Local {
     $c->stash->{'template'} = 'index.tt';
 }
 
+=head2 insert
+
+PARAMS :: name ,date_of_birth ,department ,date_of_joining ,salary ,email 
+
+RETURNS :: NONE
+
+=cut
+
 sub insert : Private {
     my ( $self, $c ) = @_;
     my $detail_rs = $self->dbi_con->resultset('EmployeeDetail');
@@ -104,7 +165,7 @@ sub insert : Private {
             department      => $c->req->body_params->{department},
             date_of_joining => $c->req->body_params->{date_of_joining},
             salary          => $c->req->body_params->{salary},
-            email           => $c->req->body_params->{email}
+            email           => $c->req->params->{email}
         }
     );
 
@@ -112,6 +173,14 @@ sub insert : Private {
     $c->stash->{'error'} ='Success';
 	$c->stash->{'template'} = 'index.tt';
 }
+
+=head2 manage
+
+PARAMS :: email 
+
+RETURNS :: Redirects to Private Subroutines
+
+=cut
 
 sub manage : Local {
     my ( $self, $c ) = @_;
@@ -122,8 +191,18 @@ sub manage : Local {
     elsif ( $c->req->param('display') ) {
 		$c->detach('display');
     }
+    $c->stash->{'email'} = "$email";
     $c->stash->{'template'} = 'Employee_Form.tt';
 }
+
+=head2 manage_data
+
+PARAMS :: NONE 
+
+RETURNS :: NONE
+
+=cut
+
 
 sub manage_data :Local {
     my ( $self, $c ) = @_;
@@ -132,12 +211,25 @@ sub manage_data :Local {
     }
     elsif ( $c->req->param('edit') ) {
         $c->detach('edit');
-  }
+  }elsif( $c->req->param('cancel') ) {
+        $c->stash->{'error'} = "** Cancelled  **";
+         $c->stash->{'template'} = 'index.tt'; 
+ }
 }
+
+=head2 edit
+
+PARAMS :: name ,date_of_birth ,department ,date_of_joining ,salary ,email 
+
+RETURNS :: NONE
+
+=cut
+
+
 
 sub edit : Private {
     my ( $self, $c ) = @_;
-    my $email         = $c->req->body_params->{email};
+    my $email         = $c->req->params->{email};
     my $detail_rs     = $self->dbi_con->resultset('EmployeeDetail');
     my $detail_rs_obj = $detail_rs->search( { email => $email } );
  
@@ -160,6 +252,15 @@ sub edit : Private {
     $c->stash->{'template'} = 'index.tt';
 }
 
+=head2 insert
+
+PARAMS :: email 
+
+RETURNS :: NONE
+
+=cut
+
+
 sub delete : Private {
     my ( $self, $c, $email ) = @_;
     my $detail_rs = $self->dbi_con->resultset('EmployeeDetail');
@@ -178,6 +279,12 @@ sub delete : Private {
 	$c->stash->{'error'} ='Success';
     $c->stash->{'template'} = 'index.tt';
 }
+
+=head2 display
+
+PARAMS :: NONE
+
+=cut
 
 sub display : Private {
     my ( $self, $c ) = @_;

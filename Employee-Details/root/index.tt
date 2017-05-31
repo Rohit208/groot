@@ -33,7 +33,7 @@
  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 
 <form name ="Insert" method ="POST" action="manage">
-Enter Email ::: </b><input type="text" name="email" value="" title="enter the email" />
+Enter Email ::: </b><input type="text" name="email" value="" title="enter the email" required/>
 <br><br><br><br><br><br><br>
 	<div class="row">
 		<div class="col-md-3">

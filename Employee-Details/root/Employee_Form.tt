@@ -12,21 +12,23 @@
 <body>
 <center>
 <form name = "Create" method="POST" action ="manage_data">
-Enter Name here ::: <input type="text" name = "name" /><br><br>
+Enter Name here ::: <input type="text" name = "name" required/><br><br>
 
-Enter date of birth here :::<input type="text" name = "date_of_birth" / ><br><br>
+Enter date of birth here :::<input type="text" name = "date_of_birth" required/ ><br><br>
 
-Enter Department here ::: <input type="text" name = "department" /><br><br>
+Enter Department here ::: <input type="text" name = "department" required/><br><br>
 
-Enter date of joining here ::: <input type="text" name = "date_of_joining"/><br><br>
+Enter date of joining here ::: <input type="text" name = "date_of_joining" required/><br><br>
 
-Enter salary of Employee ::: <input type="text" name = "salary"/><br><br>
+Enter salary of Employee ::: <input type="text" name = "salary" required/><br><br>
 
-Emter Email id here ::: <input type="text" name = "email"/><br><br>
+Enter Email id here :::<input type="text" name = "salary" required/><br>
+
+   <p name ="email">[% email %]</p>
 <br>
-
-  <input type="submit" name = "save" value ="Create New"/><br><br><br>
-  <input type="submit" name = "edit" value ="Edit Old"/>
+  <input type="submit" name = "save" value ="Create New"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="submit" name = "edit" value ="Edit Old"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="submit" name = "cancel" value ="Cancel"/>
 </form>
 </center>
 
